@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-bnd
+    xmlns="http://websphere.ibm.com/xml/ns/javaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://websphere.ibm.com/xml/ns/javaee
+        http://websphere.ibm.com/xml/ns/javaee/ibm-web-bnd_1_0.xsd"
+    version="1.0">
+
+    <!-- DataSource bindings — from v7 and v8.5 -->
+    <resource-ref name="jdbc/BankDS"
+                  binding-name="jdbc/BankDS"/>
+    <resource-ref name="jdbc/DebitDS"
+                  binding-name="jdbc/DebitDS"/>
+    <resource-ref name="jdbc/CreditDS"
+                  binding-name="jdbc/CreditDS"/>
+    <resource-ref name="jdbc/SessionDS"
+                  binding-name="jdbc/SessionDS"/>
+
+    <!-- v10 Sprint 3 — Security Role to Group Bindings
+         This tells WAS: when the application asks if someone has
+         the Customer role — check if they are in the Customer group.
+         When it asks for Administrator — check the Administrator group. -->
+
+    <security-role name="Customer">
+        <group name="Customer"/>
+    </security-role>
+
+    <security-role name="Administrator">
+        <group name="Administrator"/>
+    </security-role>
+
+</web-bnd>
