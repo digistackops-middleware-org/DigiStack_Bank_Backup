@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app
+    xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
+                        http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+    version="3.1"
+    metadata-complete="false">
+
+    <display-name>DigiStack Bank</display-name>
+
+    <description>
+        DigiStack Bank Web Application — P01 v13 Notifications.
+        Runs on WebSphere ND 9.0.5.28. Servlet 3.1 / Java EE 7.
+    </description>
+
+    <session-config>
+        <session-timeout>30</session-timeout>
+    </session-config>
+
+    <welcome-file-list>
+        <welcome-file>index.jsp</welcome-file>
+    </welcome-file-list>
+
+    <error-page>
+        <error-code>404</error-code>
+        <location>/Home</location>
+    </error-page>
+
+    <error-page>
+        <error-code>500</error-code>
+        <location>/Home</location>
+    </error-page>
+
+    <mime-mapping>
+        <extension>css</extension>
+        <mime-type>text/css</mime-type>
+    </mime-mapping>
+
+    <mime-mapping>
+        <extension>js</extension>
+        <mime-type>application/javascript</mime-type>
+    </mime-mapping>
+
+    <!-- ── v10 Security Constraints (unchanged) ── -->
+
+    <security-constraint>
+        <display-name>Freeze — Administrator Only</display-name>
+        <web-resource-collection>
+            <web-resource-name>FreezeResource</web-resource-name>
+            <url-pattern>/Freeze</url-pattern>
+            <http-method>GET</http-method>
+            <http-method>POST</http-method>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>Administrator</role-name>
+        </auth-constraint>
+        <user-data-constraint>
+            <transport-guarantee>NONE</transport-guarantee>
+        </user-data-constraint>
+    </security-constraint>
+
+    <security-constraint>
+        <display-name>Unfreeze — Administrator Only</display-name>
+        <web-resource-collection>
+            <web-resource-name>UnfreezeResource</web-resource-name>
+            <url-pattern>/Unfreeze</url-pattern>
+            <http-method>GET</http-method>
+            <http-method>POST</http-method>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>Administrator</role-name>
+        </auth-constraint>
+        <user-data-constraint>
+            <transport-guarantee>NONE</transport-guarantee>
+        </user-data-constraint>
+    </security-constraint>
+
+    <security-constraint>
+        <display-name>Deposit — Customer and Administrator</display-name>
+        <web-resource-collection>
+            <web-resource-name>DepositResource</web-resource-name>
+            <url-pattern>/Deposit</url-pattern>
+            <http-method>GET</http-method>
+            <http-method>POST</http-method>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>Customer</role-name>
+            <role-name>Administrator</role-name>
+        </auth-constraint>
+        <user-data-constraint>
+            <transport-guarantee>NONE</transport-guarantee>
+        </user-data-constraint>
+    </security-constraint>
+
+    <security-constraint>
+        <display-name>Withdraw — Customer and Administrator</display-name>
+        <web-resource-collection>
+            <web-resource-name>WithdrawResource</web-resource-name>
+            <url-pattern>/Withdraw</url-pattern>
+            <http-method>GET</http-method>
+            <http-method>POST</http-method>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>Customer</role-name>
+            <role-name>Administrator</role-name>
+        </auth-constraint>
+        <user-data-constraint>
+            <transport-guarantee>NONE</transport-guarantee>
+        </user-data-constraint>
+    </security-constraint>
+
+    <security-constraint>
+        <display-name>Dashboard — Customer and Administrator</display-name>
+        <web-resource-collection>
+            <web-resource-name>DashboardResource</web-resource-name>
+            <url-pattern>/Dashboard</url-pattern>
+            <http-method>GET</http-method>
+            <http-method>POST</http-method>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>Customer</role-name>
+            <role-name>Administrator</role-name>
+        </auth-constraint>
+        <user-data-constraint>
+            <transport-guarantee>NONE</transport-guarantee>
+        </user-data-constraint>
+    </security-constraint>
+
+    <security-role>
+        <description>
+            Regular bank customer. Can Deposit and Withdraw.
+            Cannot access Freeze or Unfreeze.
+        </description>
+        <role-name>Customer</role-name>
+    </security-role>
+
+    <security-role>
+        <description>
+            Bank administrator. Full access including
+            Freeze and Unfreeze accounts.
+        </description>
+        <role-name>Administrator</role-name>
+    </security-role>
+
+    <login-config>
+        <auth-method>FORM</auth-method>
+        <realm-name>DigiStack Bank</realm-name>
+        <form-login-config>
+            <form-login-page>/Login</form-login-page>
+            <form-error-page>/Login?reason=badcredentials</form-error-page>
+        </form-login-config>
+    </login-config>
+
+    <error-page>
+        <error-code>403</error-code>
+        <location>/Login?reason=forbidden</location>
+    </error-page>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         v13 Sprint 3 — JavaMail Resource Reference
+         Declares mail/BankMailSession to the Java EE container.
+         Java EE requires this declaration for any container-managed
+         resource the application uses. Without it, WAS may refuse to
+         resolve the JNDI name at runtime even though the Mail Session
+         exists in WAS configuration.
+         res-auth=Container means WAS manages the SMTP credentials —
+         the application never sees the App Password.
+         Mirrors the same pattern as jdbc/BankDS in a DataSource
+         resource-ref (declared in ibm-web-bnd.xml at v7).
+    ════════════════════════════════════════════════════════════════════ -->
+    <resource-ref>
+        <description>
+            WAS-managed JavaMail Session for withdrawal notifications.
+            Configured in Sprint 1 under Built-in Mail Provider at
+            Cell scope. SMTP credentials held in WAS config only.
+        </description>
+        <res-ref-name>mail/BankMailSession</res-ref-name>
+        <res-type>javax.mail.Session</res-type>
+        <res-auth>Container</res-auth>
+        <res-sharing-scope>Shareable</res-sharing-scope>
+    </resource-ref>
+
+</web-app>
