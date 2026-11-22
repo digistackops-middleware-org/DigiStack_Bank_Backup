@@ -1,4 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+    ibm-web-bnd.xml — DigiStack Bank v10 / v13
+    IBM WebSphere-specific binding file for the web module.
+
+    Purpose:
+    Maps the security roles declared in web.xml (Customer,
+    Administrator) to the WAS groups created in v10 Sprint 2
+    (Customer group, Administrator group).
+
+    Without this file, WAS cannot resolve which users/groups
+    should be granted each role at runtime. The application
+    would deploy but all role-protected URLs would be
+    inaccessible.
+
+    Schema:
+    Uses the ibm-web-bnd_1_0.xsd schema — correct for
+    WAS ND 9.0.5.x with Java EE 7 / Servlet 3.1 applications.
+
+    virtual-host:
+    Maps this application to WAS's default_host virtual host.
+    This is the standard mapping for all DigiStack Bank
+    servlets — it covers ports 9080, 9443, and 80/443
+    via IHS plugin routing.
+
+    security-role mappings:
+      Customer      → Customer group (contains customer1)
+      Administrator → Administrator group (contains admin1, wasadmin)
+-->
 <web-bnd
     xmlns="http://websphere.ibm.com/xml/ns/javaee"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -6,25 +34,23 @@
         http://websphere.ibm.com/xml/ns/javaee/ibm-web-bnd_1_0.xsd"
     version="1.0">
 
-    <!-- DataSource bindings — from v7 and v8.5 -->
-    <resource-ref name="jdbc/BankDS"
-                  binding-name="jdbc/BankDS"/>
-    <resource-ref name="jdbc/DebitDS"
-                  binding-name="jdbc/DebitDS"/>
-    <resource-ref name="jdbc/CreditDS"
-                  binding-name="jdbc/CreditDS"/>
-    <resource-ref name="jdbc/SessionDS"
-                  binding-name="jdbc/SessionDS"/>
+    <virtual-host name="default_host"/>
 
-    <!-- v10 Sprint 3 — Security Role to Group Bindings
-         This tells WAS: when the application asks if someone has
-         the Customer role — check if they are in the Customer group.
-         When it asks for Administrator — check the Administrator group. -->
-
+    <!--
+        Customer role → Customer group
+        Members: customer1
+        Access: /Deposit, /Withdraw, /Dashboard (GET and POST)
+        Blocked from: /Freeze, /Unfreeze (gets 403)
+    -->
     <security-role name="Customer">
         <group name="Customer"/>
     </security-role>
 
+    <!--
+        Administrator role → Administrator group
+        Members: admin1, wasadmin
+        Access: all URLs including /Freeze and /Unfreeze
+    -->
     <security-role name="Administrator">
         <group name="Administrator"/>
     </security-role>
